@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Doküman Asistanı</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Deneyap AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --glass-bg: rgba(30, 41, 59, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --user-bubble: #3730a3;
-            --ai-bubble: rgba(30, 41, 59, 0.9);
+            --bg-color: #ffffff;
+            --text-primary: #0d0d0d;
+            --text-secondary: #6e6e80;
+            --user-bubble: #f4f4f4;
+            --ai-bubble: transparent;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border-light: rgba(0,0,0,0.1);
         }
 
         * {
@@ -23,12 +23,11 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
             background-color: var(--bg-color);
-            background-image: radial-gradient(circle at top right, #1e1b4b, transparent 40%),
-                              radial-gradient(circle at bottom left, #0f172a, transparent 40%);
             color: var(--text-primary);
             height: 100vh;
             display: flex;
@@ -39,75 +38,99 @@
 
         .chat-container {
             width: 100%;
-            max-width: 900px;
-            height: 90vh;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
+            max-width: 800px;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            margin: 20px;
+            background: #ffffff;
+            position: relative;
         }
 
-        .header {
-            padding: 20px 30px;
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(15, 23, 42, 0.5);
-        }
-
-        .header-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #10b981;
-            box-shadow: 0 0 10px #10b981;
-        }
-
+        /* ----- CHAT AREA ----- */
         .chat-area {
             flex: 1;
-            padding: 30px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
             scroll-behavior: smooth;
         }
 
-        /* Scrollbar Styling */
         .chat-area::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         .chat-area::-webkit-scrollbar-track {
             background: transparent;
         }
         .chat-area::-webkit-scrollbar-thumb {
-            background: var(--glass-border);
+            background: #e5e5e5;
             border-radius: 10px;
         }
 
+        /* Mükemmel Ortalama İçin: Sadece içi boşken veya ilk elemanda ortalar */
+        .initial-view {
+            margin: auto;
+            text-align: center;
+            padding: 0 20px 40px 20px;
+            animation: fadeIn 0.6s ease-out;
+            width: 100%;
+        }
+
+        /* DENEYAP AI Logo Stili */
+        .logo-container {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .logo-text-fallback {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        
+        .logo-text-fallback span.letter-D { color: #cc1b21; }
+        .logo-text-fallback span.letter-E1 { color: #f29b16; }
+        .logo-text-fallback span.letter-N { color: #075f91; }
+        .logo-text-fallback span.letter-E2 { color: #d6242c; }
+        .logo-text-fallback span.letter-Y { color: #f7a016; }
+        .logo-text-fallback span.letter-A { color: #0da3e3; }
+        .logo-text-fallback span.letter-P { color: #c41e24; }
+        
+        .ai-superscript {
+            font-size: 20px;
+            font-weight: 800;
+            color: #075f91;
+            margin-left: 5px;
+            margin-top: -5px;
+        }
+
+        .greeting-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        /* Mesaj Baloncukları */
         .message {
-            max-width: 80%;
-            padding: 15px 20px;
-            border-radius: 20px;
+            max-width: 90%;
+            margin-bottom: 24px;
             line-height: 1.6;
-            font-size: 0.95rem;
+            font-size: 1rem;
             animation: fadeIn 0.3s ease-out;
             word-wrap: break-word;
+            position: relative;
         }
 
         @keyframes fadeIn {
@@ -118,23 +141,50 @@
         .message.user {
             align-self: flex-end;
             background: var(--user-bubble);
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 15px rgba(55, 48, 163, 0.3);
+            padding: 12px 20px;
+            border-radius: 24px;
+            color: #0d0d0d;
         }
 
         .message.ai {
             align-self: flex-start;
             background: var(--ai-bubble);
-            border: 1px solid var(--glass-border);
-            border-bottom-left-radius: 4px;
+            color: #0d0d0d;
+            padding: 8px 10px 8px 45px;
+            /* width: 100%; */
         }
 
-        /* Sources Styles */
+        /* AI Avatar */
+        .message.ai::before {
+            content: "\f0d0"; /* magic wand icon from font-awesome */
+            font-family: "FontAwesome";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 30px;
+            height: 30px;
+            background: conic-gradient(from 180deg at 50% 50%, #0da3e3 0deg, #f29b16 120deg, #cc1b21 240deg, #0da3e3 360deg);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .message.ai.typing-msg::before {
+            content: "\f254"; /* hourglass */
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Dosya/Kaynak Etiketleri */
         .sources {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--glass-border);
-            font-size: 0.8rem;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.85rem;
             color: var(--text-secondary);
             display: flex;
             gap: 8px;
@@ -142,30 +192,49 @@
         }
 
         .source-tag {
-            background: rgba(255, 255, 255, 0.05);
+            background: #f4f4f4;
+            color: #000;
             padding: 4px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1px solid #e5e5e5;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .source-tag::before {
+            content: "\f15b";
+            font-family: "FontAwesome";
+            color: #6e6e80;
         }
 
-        .input-area {
-            padding: 20px 30px;
-            background: rgba(15, 23, 42, 0.5);
-            border-top: 1px solid var(--glass-border);
+        /* ----- INPUT AREA ----- */
+        .input-area-container {
+            padding: 10px 20px 20px 20px;
+            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 30%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .input-wrapper {
+            position: relative;
             display: flex;
-            gap: 15px;
-            background: rgba(30, 41, 59, 0.8);
-            padding: 8px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            transition: border-color 0.3s ease;
+            width: 100%;
+            max-width: 760px;
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+            align-items: flex-end; /* keeps the button at bottom for multi-line */
+            padding: 6px 6px 6px 20px;
         }
 
         .input-wrapper:focus-within {
-            border-color: var(--accent);
+            border-color: #d1d5db;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
 
         input[type="text"] {
@@ -174,92 +243,109 @@
             border: none;
             color: var(--text-primary);
             font-size: 1rem;
-            padding: 10px 15px;
+            padding: 12px 10px 12px 0;
             outline: none;
+            min-height: 48px;
         }
 
         input[type="text"]::placeholder {
-            color: var(--text-secondary);
+            color: #9ca3af;
         }
 
         button {
-            background: var(--accent);
+            background: #2563eb;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+            margin-bottom: 5px; /* alignment */
         }
 
         button:hover {
-            background: var(--accent-hover);
-            transform: scale(1.02);
+            background: #1d4ed8;
         }
 
         button:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
         }
 
-        /* Typing Indicator */
+        button:disabled {
+            background: #e5e5e5;
+            color: #a3a3a3;
+            cursor: not-allowed;
+        }
+
+        /* Disclaimer Footer */
+        .disclaimer {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        /* Typing Dots */
         .typing-indicator {
             display: flex;
-            gap: 6px;
-            padding: 5px;
+            gap: 4px;
+            padding: 8px 0;
+            align-items: center;
         }
 
         .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--text-secondary);
+            width: 6px;
+            height: 6px;
+            background: #000000;
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
-
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        /* Error Text */
-        .error-text {
-            color: #ef4444;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
 
     </style>
 </head>
 <body>
 
     <div class="chat-container">
-        <div class="header">
-            <div class="header-title">
-                <div class="status-dot"></div>
-                RAG_T3 AI Asistanı
-            </div>
-            <div style="color: var(--text-secondary); font-size: 0.9rem;">Yapay Zeka Hazır</div>
-        </div>
-
+        
         <div class="chat-area" id="chatbox">
-            <div class="message ai">
-                Merhaba! Yüklediğiniz belgeler üzerinden bana istediğiniz soruyu sorabilirsiniz. Size nasıl yardımcı olabilirim? 
+            <!-- Initial Centered View -->
+            <div class="initial-view" id="initial-view">
+                <div class="logo-container">
+                    <!-- Gerçek resim varsa yükler, yoksa fallback css yazısına geçer -->
+                    <img src="/static/logo.png" alt="Deneyap AI Logo" class="logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-text-fallback').style.display='flex';">
+                    
+                    <div class="logo-text-fallback" id="logo-text-fallback" style="display:none;">
+                        <span class="letter-D">D</span>
+                        <span class="letter-E1">E</span>
+                        <span class="letter-N">N</span>
+                        <span class="letter-E2">E</span>
+                        <span class="letter-Y">Y</span>
+                        <span class="letter-A">A</span>
+                        <span class="letter-P">P</span>
+                        <span class="ai-superscript">AI</span>
+                    </div>
+                </div>
+                <h2 class="greeting-text">Bugün size nasıl yardımcı olabilirim?</h2>
             </div>
         </div>
 
-        <div class="input-area">
+        <div class="input-area-container">
             <form id="chat-form" class="input-wrapper">
-                <input type="text" id="user-input" placeholder="Dokümanlar hakkında bir soru sorun..." autocomplete="off" required>
-                <button type="submit" id="send-btn">Gönder</button>
+                <input type="text" id="user-input" placeholder="Deneyap AI'ya mesaj gönder..." autocomplete="off" required>
+                <button type="submit" id="send-btn"><i class="fa-solid fa-arrow-up"></i></button>
             </form>
+            <div class="disclaimer">
+                Deneyap AI hata yapabilir. Önemli bilgileri kontrol edin.
+            </div>
         </div>
+        
     </div>
 
     <script>
@@ -267,6 +353,8 @@
         const userInput = document.getElementById('user-input');
         const chatbox = document.getElementById('chatbox');
         const sendBtn = document.getElementById('send-btn');
+        const initialView = document.getElementById('initial-view');
+        let isFirstMessage = true;
 
         // Scroll to bottom helper
         function scrollToBottom() {
@@ -275,6 +363,11 @@
 
         // Add message to UI
         function addMessage(content, sender, sources = []) {
+            if(isFirstMessage) {
+                initialView.style.display = 'none';
+                isFirstMessage = false;
+            }
+
             const div = document.createElement('div');
             div.className = `message ${sender}`;
             
@@ -289,12 +382,14 @@
             if (sources && sources.length > 0) {
                 const sourcesDiv = document.createElement('div');
                 sourcesDiv.className = 'sources';
-                sourcesDiv.innerHTML = '<strong>Kaynaklar:</strong> ';
+                // sourcesDiv.innerHTML = '<strong>Kaynaklar:</strong> ';
                 
                 sources.forEach(src => {
                     const tag = document.createElement('span');
                     tag.className = 'source-tag';
-                    tag.innerText = src;
+                    // Sadece sayfa numarası veya dosya adının son kısmını al
+                    const cleanName = src.split('/').pop().replace('.pdf', '');
+                    tag.innerText = cleanName;
                     sourcesDiv.appendChild(tag);
                 });
                 
@@ -309,7 +404,7 @@
         // Add typing indicator
         function showTypingIndicator() {
             const div = document.createElement('div');
-            div.className = 'message ai';
+            div.className = 'message ai typing-msg';
             div.id = 'typing-indicator';
             div.innerHTML = `
                 <div class="typing-indicator">
@@ -317,7 +412,6 @@
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
                 </div>
-                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px;">Belgeler taranıyor ve düşünülüyor...</div>
             `;
             chatbox.appendChild(div);
             scrollToBottom();
@@ -362,8 +456,9 @@
                     setTimeout(() => pollResult(taskId), 2000);
                 }
             } catch (error) {
+                // If 5xx error or fetch fail, ignore and wait gracefully if possible, or show error
                 removeTypingIndicator();
-                addMessage(`❌ Bağlantı hatası: ${error.message}. Lütfen sayfayı yenileyip tekrar deneyin.`, 'ai');
+                addMessage(`❌ Bağlantı hatası: ${error.message}. Lütfen sayfayı yenileyin.`, 'ai');
                 setInputState(false);
             }
         }
@@ -406,6 +501,9 @@
                 setInputState(false);
             }
         });
+
+        // Initialize focus
+        userInput.focus();
     </script>
 </body>
 </html>
