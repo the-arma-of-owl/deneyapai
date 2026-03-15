@@ -1,0 +1,16 @@
+langchain
+langchain-community
+langchain-core
+langchain-openai
+langchain-postgres
+pypdf
+supabase
+psycopg2-binary
+pgvector
+sentence-transformers
+uvicorn
+fastapi
+python-dotenv
+tiktoken
+pydantic
+rank_bm25

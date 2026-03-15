@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deneyap AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #0d0d0d;
+            --text-secondary: #6e6e80;
+            --user-bubble: #f4f4f4;
+            --ai-bubble: transparent;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border-light: rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            position: relative;
+        }
+
+        /* ----- CHAT AREA ----- */
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #e5e5e5;
+            border-radius: 10px;
+        }
+
+        /* Mükemmel Ortalama İçin: Sadece içi boşken veya ilk elemanda ortalar */
+        .initial-view {
+            margin: auto;
+            text-align: center;
+            padding: 0 20px 40px 20px;
+            animation: fadeIn 0.6s ease-out;
+            width: 100%;
+        }
+
+        /* DENEYAP AI Logo Stili */
+        .logo-container {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .logo-text-fallback {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        
+        .logo-text-fallback span.letter-D { color: #cc1b21; }
+        .logo-text-fallback span.letter-E1 { color: #f29b16; }
+        .logo-text-fallback span.letter-N { color: #075f91; }
+        .logo-text-fallback span.letter-E2 { color: #d6242c; }
+        .logo-text-fallback span.letter-Y { color: #f7a016; }
+        .logo-text-fallback span.letter-A { color: #0da3e3; }
+        .logo-text-fallback span.letter-P { color: #c41e24; }
+        
+        .ai-superscript {
+            font-size: 20px;
+            font-weight: 800;
+            color: #075f91;
+            margin-left: 5px;
+            margin-top: -5px;
+        }
+
+        .greeting-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        /* Mesaj Baloncukları */
+        .message {
+            max-width: 90%;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            font-size: 1rem;
+            animation: fadeIn 0.3s ease-out;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--user-bubble);
+            padding: 12px 20px;
+            border-radius: 24px;
+            color: #0d0d0d;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: var(--ai-bubble);
+            color: #0d0d0d;
+            padding: 8px 10px 8px 45px;
+            /* width: 100%; */
+        }
+
+        /* AI Avatar */
+        .message.ai::before {
+            content: "\f0d0"; /* magic wand icon from font-awesome */
+            font-family: "FontAwesome";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 30px;
+            height: 30px;
+            background: conic-gradient(from 180deg at 50% 50%, #0da3e3 0deg, #f29b16 120deg, #cc1b21 240deg, #0da3e3 360deg);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .message.ai.typing-msg::before {
+            content: "\f254"; /* hourglass */
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Dosya/Kaynak Etiketleri */
+        .sources {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .source-tag {
+            background: #f4f4f4;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1px solid #e5e5e5;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .source-tag::before {
+            content: "\f15b";
+            font-family: "FontAwesome";
+            color: #6e6e80;
+        }
+
+        /* ----- INPUT AREA ----- */
+        .input-area-container {
+            padding: 10px 20px 20px 20px;
+            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 30%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            width: 100%;
+            max-width: 760px;
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid #e5e5e5;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+            align-items: flex-end; /* keeps the button at bottom for multi-line */
+            padding: 6px 6px 6px 20px;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #d1d5db;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 12px 10px 12px 0;
+            outline: none;
+            min-height: 48px;
+        }
+
+        input[type="text"]::placeholder {
+            color: #9ca3af;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+            margin-bottom: 5px; /* alignment */
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background: #e5e5e5;
+            color: #a3a3a3;
+            cursor: not-allowed;
+        }
+
+        /* Disclaimer Footer */
+        .disclaimer {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        /* Typing Dots */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #000000;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        
+        <div class="chat-area" id="chatbox">
+            <!-- Initial Centered View -->
+            <div class="initial-view" id="initial-view">
+                <div class="logo-container">
+                    <!-- Gerçek resim varsa yükler, yoksa fallback css yazısına geçer -->
+                    <img src="/static/logo.png" alt="Deneyap AI Logo" class="logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-text-fallback').style.display='flex';">
+                    
+                    <div class="logo-text-fallback" id="logo-text-fallback" style="display:none;">
+                        <span class="letter-D">D</span>
+                        <span class="letter-E1">E</span>
+                        <span class="letter-N">N</span>
+                        <span class="letter-E2">E</span>
+                        <span class="letter-Y">Y</span>
+                        <span class="letter-A">A</span>
+                        <span class="letter-P">P</span>
+                        <span class="ai-superscript">AI</span>
+                    </div>
+                </div>
+                <h2 class="greeting-text">Bugün size nasıl yardımcı olabilirim?</h2>
+            </div>
+        </div>
+
+        <div class="input-area-container">
+            <form id="chat-form" class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Deneyap AI'ya mesaj gönder..." autocomplete="off" required>
+                <button type="submit" id="send-btn"><i class="fa-solid fa-arrow-up"></i></button>
+            </form>
+            <div class="disclaimer">
+                Deneyap AI hata yapabilir. Önemli bilgileri kontrol edin.
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatbox = document.getElementById('chatbox');
+        const sendBtn = document.getElementById('send-btn');
+        const initialView = document.getElementById('initial-view');
+        let isFirstMessage = true;
+
+        // Scroll to bottom helper
+        function scrollToBottom() {
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        // Add message to UI
+        function addMessage(content, sender, sources = []) {
+            if(isFirstMessage) {
+                initialView.style.display = 'none';
+                isFirstMessage = false;
+            }
+
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            
+            // Basic markdown handling (bold and line breaks)
+            let formattedContent = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            div.innerHTML = formattedContent;
+
+            // Append sources if available (only for AI)
+            if (sources && sources.length > 0) {
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'sources';
+                // sourcesDiv.innerHTML = '<strong>Kaynaklar:</strong> ';
+                
+                sources.forEach(src => {
+                    const tag = document.createElement('span');
+                    tag.className = 'source-tag';
+                    // Sadece sayfa numarası veya dosya adının son kısmını al
+                    const cleanName = src.split('/').pop().replace('.pdf', '');
+                    tag.innerText = cleanName;
+                    sourcesDiv.appendChild(tag);
+                });
+                
+                div.appendChild(sourcesDiv);
+            }
+
+            chatbox.appendChild(div);
+            scrollToBottom();
+            return div;
+        }
+
+        // Add typing indicator
+        function showTypingIndicator() {
+            const div = document.createElement('div');
+            div.className = 'message ai typing-msg';
+            div.id = 'typing-indicator';
+            div.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            chatbox.appendChild(div);
+            scrollToBottom();
+            return div;
+        }
+
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const el = document.getElementById('typing-indicator');
+            if (el) el.remove();
+        }
+
+        // Disable/Enable input
+        function setInputState(disabled) {
+            userInput.disabled = disabled;
+            sendBtn.disabled = disabled;
+            if (!disabled) userInput.focus();
+        }
+
+        // Poll the result endpoint
+        async function pollResult(taskId) {
+            try {
+                const response = await fetch(`/result/${taskId}`);
+                const data = await response.json();
+
+                if (response.status === 404) {
+                    throw new Error("Görev bulunamadı.");
+                }
+
+                if (data.status === 'completed') {
+                    removeTypingIndicator();
+                    addMessage(data.result.answer, 'ai', data.result.sources);
+                    setInputState(false);
+                } 
+                else if (data.status === 'failed') {
+                    removeTypingIndicator();
+                    addMessage(`❌ Bir hata oluştu: ${data.error}`, 'ai');
+                    setInputState(false);
+                } 
+                else {
+                    // Still processing/pending, check again in 2 seconds
+                    setTimeout(() => pollResult(taskId), 2000);
+                }
+            } catch (error) {
+                // If 5xx error or fetch fail, ignore and wait gracefully if possible, or show error
+                removeTypingIndicator();
+                addMessage(`❌ Bağlantı hatası: ${error.message}. Lütfen sayfayı yenileyin.`, 'ai');
+                setInputState(false);
+            }
+        }
+
+        // Handle form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 1. Add User Message
+            addMessage(text, 'user');
+            userInput.value = '';
+            setInputState(true);
+
+            // 2. Show Typing
+            showTypingIndicator();
+
+            try {
+                // 3. Send to /ask API
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Sunucu yanıt vermedi");
+                }
+
+                const data = await response.json();
+                
+                // 4. Start polling with task_id
+                pollResult(data.task_id);
+
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`❌ İstek gönderilemedi: ${error.message}`, 'ai');
+                setInputState(false);
+            }
+        });
+
+        // Initialize focus
+        userInput.focus();
+    </script>
+</body>
+</html>

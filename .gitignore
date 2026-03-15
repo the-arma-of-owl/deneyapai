@@ -1,0 +1,9 @@
+venv/
+chroma_db/
+tasks.db
+.env
+__pycache__/
+*.pyc
+.DS_Store
+start_log.txt
+okunan_pdf_parcalari.txt
